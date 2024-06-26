@@ -15,24 +15,28 @@ def getfiles(folder):
 
 
 def sortfiles(files):
-    def tarjan(graph, whitelist, graylist, blacklist, vertex):
+    def tarjan(graph, whitelist, graylist, blacklist, vertex, trace):
         if vertex in blacklist:
             return
         if vertex in graylist:
-            sys.exit(f"Cyclic dependency found in {vertex}")
+            cycle = trace[trace.index(vertex):]
+            cycle.append(vertex)
+            sys.exit(f"Cyclic dependency found: {' - '.join(cycle)}")
         if vertex in whitelist:
             whitelist.remove(vertex)
+            trace.append(vertex)
             graylist.append(vertex)
             for next in graph[vertex]:
-                tarjan(graph, whitelist, graylist, blacklist, next)
+                tarjan(graph, whitelist, graylist, blacklist, next, trace)
             graylist.remove(vertex)
             blacklist.append(vertex)
 
     whitelist = [x for x in files.keys()]
     graylist = []
     blacklist = []
+    trace = []
     while whitelist:
-        tarjan(files, whitelist, graylist, blacklist, whitelist[0])
+        tarjan(files, whitelist, graylist, blacklist, whitelist[0], trace)
     return blacklist
 
 
